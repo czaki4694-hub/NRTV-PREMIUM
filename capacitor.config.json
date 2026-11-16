@@ -1,0 +1,7 @@
+{
+  "appId": "com.arabtv.app",
+  "appName": "تلفاز العرب",
+  "webDir": "www",
+  "server": { "androidScheme": "http", "cleartext": true },
+  "plugins": { "CapacitorHttp": { "enabled": true } }
+}
