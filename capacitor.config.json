@@ -3,5 +3,5 @@
   "appName": "تلفاز العرب",
   "webDir": "www",
   "server": { "androidScheme": "http", "cleartext": true },
-  "plugins": { "CapacitorHttp": { "enabled": true } }
+  "plugins": { "CapacitorHttp": { "enabled": false } }
 }
