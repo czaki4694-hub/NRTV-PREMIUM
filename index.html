@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#07060f">
+<title>تلفاز العرب</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.5.13/hls.min.js"></script>
+<style>
+:root{--bg:#07060f;--card:#12102a;--txt:#eef;--mut:#8f8bb5}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:radial-gradient(1200px 600px at 80% -10%,#2a0f4d55,transparent),var(--bg);color:var(--txt);font-family:system-ui,"Segoe UI",Tahoma,sans-serif;min-height:100vh}
+header{position:sticky;top:0;z-index:5;padding:12px 14px;background:#07060fe6;backdrop-filter:blur(10px);border-bottom:1px solid #ffffff12}
+h1{margin:0 0 10px;font-size:20px;background:linear-gradient(90deg,#0ff,#f0f,#ff0);-webkit-background-clip:text;color:transparent;display:flex;justify-content:space-between;align-items:center}
+h1 button{background:none;border:1px solid #ffffff30;color:var(--txt);border-radius:10px;padding:4px 10px;font-size:13px}
+#q{width:100%;padding:11px 14px;border-radius:14px;border:1px solid #0ff5;background:#0d0b22;color:var(--txt);font-size:15px;outline:none}
+#q:focus{box-shadow:0 0 14px #0ff6}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:10px 0 0}
+.tab{flex:none;padding:6px 14px;border-radius:20px;border:1px solid #ffffff25;background:transparent;color:var(--mut);font-size:13px}
+.tab.on{color:#000;background:#0ff;box-shadow:0 0 12px #0ff}
+#grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:20px 10px;padding:22px 14px 60px}
+.ch{display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:0;color:var(--txt);cursor:pointer;font:inherit}
+.ico{--c:#0ff;position:relative;width:76px;height:76px;border-radius:50%;background:var(--card);display:grid;place-items:center;overflow:hidden;border:2px solid var(--c);box-shadow:0 0 6px var(--c),0 0 18px var(--c),inset 0 0 12px #0008;transition:.2s}
+.ch:hover .ico,.ch:active .ico{transform:scale(1.08);box-shadow:0 0 10px var(--c),0 0 32px var(--c)}
+.ico img{width:76%;height:76%;object-fit:contain;border-radius:50%}
+.ico b{font-size:22px;color:var(--c);text-shadow:0 0 8px var(--c)}
+.ch.cur .ico{animation:p 1.6s infinite}
+@keyframes p{50%{box-shadow:0 0 14px var(--c),0 0 44px var(--c)}}
+.nm{font-size:12px;text-align:center;line-height:1.3;max-width:96px}
+.fav{position:absolute;top:2px;right:6px;font-size:13px;color:#ff0;text-shadow:0 0 6px #ff0}
+#pl{position:fixed;inset:0;z-index:20;background:#000e;display:none;align-items:center;justify-content:center}
+#pl.open{display:flex}
+#box{position:relative;width:min(100vw,1100px);max-height:100vh;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 0 30px #0ff5}
+#box:fullscreen{border-radius:0;width:100vw;max-width:none}
+video{width:100%;height:100%;background:#000}
+#ov{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(#000a,transparent 25%,transparent 65%,#000c);transition:opacity .3s}
+#ov.hide{opacity:0;cursor:none}
+.row{display:flex;align-items:center;gap:6px;padding:10px 12px;direction:ltr}
+.row.top{justify-content:space-between}
+.btn{background:#ffffff18;border:1px solid #ffffff30;color:#fff;border-radius:50%;width:38px;height:38px;font-size:16px;cursor:pointer;flex:none}
+.btn:hover{background:#0ff4;box-shadow:0 0 10px #0ff}
+select.btn{border-radius:10px;width:auto;padding:0 6px;font-size:12px}
+select option{color:#000}
+#tt{font-weight:700;direction:rtl;text-shadow:0 0 8px #000}
+#vol{width:80px;accent-color:#0ff}
+.live{background:#e11;border-radius:6px;padding:2px 8px;font-size:11px;font-weight:700}
+#msg{position:absolute;inset:0;display:none;place-items:center;text-align:center;color:#fff;background:#000a;padding:20px}
+#sp{position:absolute;top:50%;left:50%;width:44px;height:44px;margin:-22px;border:4px solid #0ff3;border-top-color:#0ff;border-radius:50%;animation:r 1s linear infinite;display:none}
+@keyframes r{to{transform:rotate(360deg)}}
+#dlg{position:fixed;inset:0;z-index:30;background:#000c;display:none;place-items:center;padding:16px}
+#dlg>div{background:var(--card);padding:18px;border-radius:16px;width:min(420px,100%);border:1px solid #f0f6}
+#dlg input{width:100%;padding:10px;border-radius:10px;border:1px solid #0ff5;background:#0d0b22;color:#fff;margin:8px 0;direction:ltr}
+#dlg button{padding:9px 14px;border-radius:10px;border:0;margin:4px 0 0 6px;font-weight:700;cursor:pointer}
+.go{background:#0ff}.cl{background:#ffffff20;color:#fff}
+</style>
+</head>
+<body>
+<header>
+ <h1><span>📺 تلفاز العرب</span><button id="imp">+ قائمة M3U</button></h1>
+ <input id="q" type="search" placeholder="ابحث عن قناة…">
+ <div class="tabs" id="tabs"></div>
+</header>
+<main id="grid"></main>
+
+<div id="pl"><div id="box">
+ <video id="v" playsinline autoplay></video><div id="sp"></div>
+ <div id="msg"><div><p id="mt">⚠️ تعذر تشغيل القناة</p><button class="btn" style="width:auto;padding:0 16px;border-radius:10px" id="rt">إعادة المحاولة</button></div></div>
+ <div id="ov">
+  <div class="row top"><button class="btn" id="cls">✕</button><span id="tt"></span><span class="live">LIVE</span></div>
+  <div class="row">
+   <button class="btn" id="pv">⏮</button><button class="btn" id="pp">⏸</button><button class="btn" id="nx">⏭</button>
+   <button class="btn" id="mu">🔊</button><input id="vol" type="range" min="0" max="1" step=".05" value="1">
+   <span style="flex:1"></span>
+   <select class="btn" id="ql"><option value="-1">Auto</option></select>
+   <button class="btn" id="fv">☆</button>
+   <button class="btn" id="pip">⧉</button><button class="btn" id="fs">⛶</button>
+  </div>
+ </div>
+</div></div>
+
+<div id="dlg"><div>
+ <b>إضافة قائمة قنوات (M3U)</b>
+ <input id="url" placeholder="https://…/list.m3u">
+ <button class="go" id="add">إضافة</button><button class="go" id="iptv" style="background:#f0f;color:#fff">قنوات المغرب (iptv-org)</button><button class="cl" id="dc">إغلاق</button>
+ <p id="ds" style="font-size:12px;color:var(--mut)"></p>
+</div></div>
+
+<script>
+const $=s=>document.querySelector(s);
+const COL=["#0ff","#f0f","#ff0","#0f8","#ff6a00","#6a7bff","#ff3b6b"];
+const E="https://cdn.live.easybroadcast.io/abr_corp/";
+let base=[
+ {n:"الأولى",c:"مغربية",u:E+"73_aloula_w1dqfwm/playlist_dvr.m3u8"},
+ {n:"2M",c:"مغربية",u:E+"73_2m_83tz85q/playlist_dvr.m3u8"},
+ {n:"الرياضية",c:"مغربية",u:E+"73_arryadia_k2tgcj0/playlist_dvr.m3u8"},
+ {n:"الأمازيغية",c:"مغربية",u:E+"73_tamazight_w9kwq5d/playlist_dvr.m3u8"},
+ {n:"السادسة",c:"مغربية",u:E+"73_assadissa_prxu8s0/playlist_dvr.m3u8"},
+ {n:"ميدي 1 تي في",c:"مغربية",u:"https://streaming1.medi1tv.com/live/smil:medi1ar.smil/playlist.m3u8"},
+ {n:"الجزيرة",c:"أخبار",u:"https://live-hls-apps-aja-fa.getaj.net/AJA/index.m3u8"},
+ {n:"العربية",c:"أخبار",u:"https://live.alarabiya.net/alarabiapublish/alarabiya.smil/playlist.m3u8"},
+ {n:"فرانس 24",c:"أخبار",u:"https://static.france24.com/live/F24_AR_HI_HLS/live_web.m3u8"},
+ {n:"سكاي نيوز عربية",c:"أخبار",u:"https://stream.skynewsarabia.com/hls/sna.m3u8"},
+ {n:"DW عربية",c:"أخبار",u:"https://dwamdstream103.akamaized.net/hls/live/2015526/dwstream103/index.m3u8"}
+];
+let custom=JSON.parse(localStorage.getItem("custom")||"[]");
+let favs=new Set(JSON.parse(localStorage.getItem("favs")||"[]"));
+let cat="الكل",list=[],idx=-1,hls=null,hideT;
+const all=()=>base.concat(custom);
+const v=$("#v");
+
+function render(){
+ const q=$("#q").value.trim().toLowerCase();
+ const cs=["الكل","⭐ المفضلة",...new Set(all().map(x=>x.c))];
+ $("#tabs").innerHTML=cs.map(c=>`<button class="tab ${c==cat?"on":""}" data-c="${c}">${c}</button>`).join("");
+ list=all().filter(x=>(cat=="الكل"||(cat=="⭐ المفضلة"?favs.has(x.n):x.c==cat))&&x.n.toLowerCase().includes(q));
+ $("#grid").innerHTML=list.map((x,i)=>{
+  const col=COL[[...x.n].reduce((a,c)=>a+c.charCodeAt(0),0)%COL.length];
+  return `<button class="ch ${all()[idx]===x?"cur":""}" data-i="${i}"><div class="ico" style="--c:${col}">${x.l?`<img src="${x.l}" loading="lazy" onerror="this.replaceWith(Object.assign(document.createElement('b'),{textContent:'${[...x.n][0]}'}))">`:`<b>${[...x.n][0]}</b>`}${favs.has(x.n)?'<span class="fav">★</span>':""}</div><span class="nm">${x.n}</span></button>`}).join("")||`<p style="grid-column:1/-1;text-align:center;color:var(--mut)">لا توجد قنوات</p>`;
+}
+$("#tabs").onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;render()}};
+$("#q").oninput=render;
+$("#grid").onclick=e=>{const b=e.target.closest(".ch");if(b)play(list[+b.dataset.i])};
+
+function play(ch){
+ idx=all().indexOf(ch);$("#pl").classList.add("open");$("#tt").textContent=ch.n;
+ $("#msg").style.display="none";$("#sp").style.display="block";
+ $("#fv").textContent=favs.has(ch.n)?"★":"☆";
+ if(hls){hls.destroy();hls=null}
+ const ok=()=>{$("#sp").style.display="none"},bad=()=>{$("#sp").style.display="none";$("#msg").style.display="grid"};
+ v.onplaying=ok;v.onwaiting=()=>$("#sp").style.display="block";
+ if(window.Hls&&Hls.isSupported()){
+  hls=new Hls({enableWorker:true,lowLatencyMode:true,maxBufferLength:30});
+  hls.loadSource(ch.u);hls.attachMedia(v);
+  hls.on(Hls.Events.MANIFEST_PARSED,(_,d)=>{
+   $("#ql").innerHTML='<option value="-1">Auto</option>'+d.levels.map((l,i)=>`<option value="${i}">${l.height||Math.round(l.bitrate/1000)+"k"}p</option>`).join("");
+   v.play().catch(()=>{});
+  });
+  let tries=0;
+  hls.on(Hls.Events.ERROR,(_,d)=>{if(!d.fatal)return;
+   if(d.type==Hls.ErrorTypes.NETWORK_ERROR&&tries++<3)hls.startLoad();
+   else if(d.type==Hls.ErrorTypes.MEDIA_ERROR&&tries++<3)hls.recoverMediaError();
+   else bad()});
+ }else if(v.canPlayType("application/vnd.apple.mpegurl")){v.src=ch.u;v.onerror=bad;v.play().catch(()=>{})}
+ else bad();
+ wake();render();
+ if("mediaSession"in navigator)navigator.mediaSession.metadata=new MediaMetadata({title:ch.n,artist:"تلفاز العرب"});
+}
+function step(d){const a=all();if(a.length)play(a[(idx+d+a.length)%a.length])}
+$("#pv").onclick=()=>step(-1);$("#nx").onclick=()=>step(1);
+$("#rt").onclick=()=>play(all()[idx]);
+$("#pp").onclick=()=>v.paused?v.play():v.pause();
+v.onplay=()=>$("#pp").textContent="⏸";v.onpause=()=>$("#pp").textContent="▶";
+$("#mu").onclick=()=>{v.muted=!v.muted;$("#mu").textContent=v.muted?"🔇":"🔊"};
+$("#vol").oninput=e=>{v.volume=e.target.value;v.muted=false};
+$("#ql").onchange=e=>{if(hls)hls.currentLevel=+e.target.value};
+$("#fv").onclick=()=>{const n=all()[idx].n;favs.has(n)?favs.delete(n):favs.add(n);localStorage.setItem("favs",JSON.stringify([...favs]));$("#fv").textContent=favs.has(n)?"★":"☆";render()};
+$("#fs").onclick=()=>document.fullscreenElement?document.exitFullscreen():$("#box").requestFullscreen?.().catch(()=>{});
+$("#pip").onclick=()=>document.pictureInPictureElement?document.exitPictureInPicture():v.requestPictureInPicture?.().catch(()=>{});
+$("#cls").onclick=()=>{if(hls){hls.destroy();hls=null}v.pause();v.removeAttribute("src");v.load();if(document.fullscreenElement)document.exitFullscreen();$("#pl").classList.remove("open");idx=-1;render()};
+function wake(){$("#ov").classList.remove("hide");clearTimeout(hideT);hideT=setTimeout(()=>{if(!v.paused)$("#ov").classList.add("hide")},3500)}
+$("#box").onmousemove=$("#box").ontouchstart=wake;
+v.ondblclick=()=>$("#fs").click();
+document.onkeydown=e=>{if(!$("#pl").classList.contains("open"))return;
+ const k=e.key;
+ if(k==" "){e.preventDefault();$("#pp").click()}else if(k=="f")$("#fs").click();else if(k=="m")$("#mu").click();
+ else if(k=="ArrowUp"){v.volume=Math.min(1,v.volume+.1);$("#vol").value=v.volume}else if(k=="ArrowDown"){v.volume=Math.max(0,v.volume-.1);$("#vol").value=v.volume}
+ else if(k=="ArrowRight")step(-1);else if(k=="ArrowLeft")step(1);else if(k=="Escape"&&!document.fullscreenElement)$("#cls").click();wake()};
+
+// M3U
+function parse(t){const out=[],L=t.split(/\r?\n/);
+ for(let i=0;i<L.length;i++){if(!L[i].startsWith("#EXTINF"))continue;
+  const n=(L[i].split(",").pop()||"").trim(),g=(L[i].match(/group-title="([^"]*)"/)||[])[1]||"مستورد",l=(L[i].match(/tvg-logo="([^"]*)"/)||[])[1];
+  let u=L[i+1];while(u&&u.startsWith("#"))u=L[++i+1];
+  if(n&&u&&/^https?:/.test(u))out.push({n,c:g,u:u.trim(),l})}
+ return out}
+async function load(url){const s=$("#ds");s.textContent="جارٍ التحميل…";
+ try{const r=await fetch(url);const a=parse(await r.text());if(!a.length)throw 0;
+  custom=custom.concat(a.filter(x=>!all().some(y=>y.u==x.u)));localStorage.setItem("custom",JSON.stringify(custom));
+  s.textContent="تمت إضافة "+a.length+" قناة ✓";render()}catch(e){s.textContent="تعذر تحميل القائمة (تحقق من الرابط/CORS)"}}
+$("#imp").onclick=()=>$("#dlg").style.display="grid";
+$("#dc").onclick=()=>$("#dlg").style.display="none";
+$("#add").onclick=()=>$("#url").value&&load($("#url").value);
+$("#iptv").onclick=()=>load("https://iptv-org.github.io/iptv/countries/ma.m3u");
+if("serviceWorker"in navigator&&location.protocol=="https:")navigator.serviceWorker.register("sw.js").catch(()=>{});
+render();
+</script>
+</body>
+</html>
