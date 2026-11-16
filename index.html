@@ -103,12 +103,18 @@ $("#tabs").onclick=e=>{if(e.target.dataset.c){cat=e.target.dataset.c;render()}};
 $("#q").oninput=render;
 
 // فتح القناة في مشغل خارجي
-const Ext=window.Capacitor&&Capacitor.registerPlugin?Capacitor.registerPlugin("ExtPlayer"):null;
+const C=window.Capacitor;
+const inApp=!!(C&&(C.nativePromise||(C.isNativePlatform&&C.isNativePlatform())));
 async function openExt(ch){
  const pkg=localStorage.getItem("pkg")||"";
- if(!Ext){try{await navigator.clipboard.writeText(ch.u);toast("تم نسخ رابط البث — الصقه في VLC")}catch(e){prompt("انسخ الرابط:",ch.u)}return}
- try{await Ext.open({url:ch.u,title:ch.n,pkg})}
- catch(e){toast(pkg?"المشغل المختار غير مثبت على هاتفك":"تعذر فتح المشغل")}
+ if(!inApp){try{await navigator.clipboard.writeText(ch.u);toast("تم نسخ رابط البث — الصقه في VLC")}catch(e){prompt("انسخ الرابط:",ch.u)}return}
+ try{
+  const o={url:ch.u,title:ch.n,pkg};
+  if(C.nativePromise)await C.nativePromise("ExtPlayer","open",o);
+  else if(C.Plugins&&C.Plugins.ExtPlayer)await C.Plugins.ExtPlayer.open(o);
+  else if(C.registerPlugin)await C.registerPlugin("ExtPlayer").open(o);
+  else throw new Error("no bridge");
+ }catch(e){toast(pkg?"المشغل المختار غير مثبت على هاتفك":"تعذر فتح المشغل: "+(e&&e.message||e))}
 }
 let pt,long=false;
 const G=$("#grid");
